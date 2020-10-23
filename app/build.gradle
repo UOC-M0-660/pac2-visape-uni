@@ -46,6 +46,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.3.0'
     androidTestImplementation 'androidx.test:rules:1.3.0'
     // TODO: Add Firebase
+    implementation platform('com.google.firebase:firebase-bom:25.12.0')
     // TODO: Add Room
     // TODO: Add Image Loading Library
     // Other Libraries
