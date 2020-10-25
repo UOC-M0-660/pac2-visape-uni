@@ -1,18 +1,23 @@
 package edu.uoc.pac2.ui
 
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import edu.uoc.pac2.MyApplication
 import edu.uoc.pac2.R
+import edu.uoc.pac2.data.ApplicationDatabase
 import edu.uoc.pac2.data.Book
 import edu.uoc.pac2.data.BooksInteractor
 import edu.uoc.pac2.data.FirestoreBookData
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * An activity representing a list of Books.
@@ -58,21 +63,30 @@ class BookListActivity : AppCompatActivity() {
 
     // TODO: Get Books and Update UI
     private fun getBooks() {
-        val db = Firebase.firestore
-        val colRef = db.collection(BOOKS_COLLETION)
+        GlobalScope.launch {
+            val books = (applicationContext as MyApplication).getBooksInteractor().getAllBooks()
+            adapter.setBooks(books)
+        }
 
-        colRef.addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                Log.w(TAG, "Listen failed.", e)
-                return@addSnapshotListener
-            }
+        Log.d(TAG, (applicationContext as MyApplication).hasInternetConnection().toString())
+        if ((applicationContext as MyApplication).hasInternetConnection()) {
+            val db = Firebase.firestore
+            val colRef = db.collection(BOOKS_COLLETION)
 
-            if (snapshot != null && !snapshot.isEmpty) {
-                Log.d(TAG, "Data received")
-                val books: List<Book> = snapshot.documents.mapNotNull { it.toObject(Book::class.java) }
-                adapter.setBooks(books)
-            } else {
-                Log.d(TAG, "Current data: null")
+            colRef.addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    Log.d(TAG, "Data received")
+                    val books: List<Book> = snapshot.documents.mapNotNull { it.toObject(Book::class.java) }
+                    saveBooksToLocalDatabase(books)
+                    adapter.setBooks(books)
+                } else {
+                    Log.d(TAG, "Current data: null")
+                }
             }
         }
     }
@@ -84,6 +98,8 @@ class BookListActivity : AppCompatActivity() {
 
     // TODO: Save Books to Local Storage
     private fun saveBooksToLocalDatabase(books: List<Book>) {
-        throw NotImplementedError()
+        GlobalScope.launch {
+            (applicationContext as MyApplication).getBooksInteractor().saveBooks(books)
+        }
     }
 }

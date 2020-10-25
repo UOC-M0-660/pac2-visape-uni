@@ -1,6 +1,10 @@
 package edu.uoc.pac2
 
 import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.util.Log
 import edu.uoc.pac2.data.*
 
 /**
@@ -13,7 +17,9 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // TODO: Init Room Database
+        val db = ApplicationDatabase.getDatabase(applicationContext)
         // TODO: Init BooksInteractor
+        booksInteractor = BooksInteractor(db.bookDao())
     }
 
     fun getBooksInteractor(): BooksInteractor {
@@ -21,7 +27,12 @@ class MyApplication : Application() {
     }
 
     fun hasInternetConnection(): Boolean {
-        // TODO: Add Internet Check logic.
-        return true
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (cm.activeNetwork != null) {
+            val nc = cm.getNetworkCapabilities(cm.activeNetwork)
+            return (nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
+        } else {
+            return false
+        }
     }
 }
