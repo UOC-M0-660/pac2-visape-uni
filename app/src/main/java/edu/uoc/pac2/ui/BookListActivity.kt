@@ -41,6 +41,7 @@ class BookListActivity : AppCompatActivity() {
         getBooks()
 
         // TODO: Add books data to Firestore [Use once for new projects with empty Firestore Database]
+        //FirestoreBookData.addBooksDataToFirestoreDatabase()
     }
 
     // Init Top Toolbar
@@ -68,7 +69,6 @@ class BookListActivity : AppCompatActivity() {
             adapter.setBooks(books)
         }
 
-        Log.d(TAG, (applicationContext as MyApplication).hasInternetConnection().toString())
         if ((applicationContext as MyApplication).hasInternetConnection()) {
             val db = Firebase.firestore
             val colRef = db.collection(BOOKS_COLLETION)

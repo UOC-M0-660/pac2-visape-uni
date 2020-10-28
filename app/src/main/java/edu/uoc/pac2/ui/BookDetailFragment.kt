@@ -1,12 +1,20 @@
 package edu.uoc.pac2.ui
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import edu.uoc.pac2.MyApplication
 import edu.uoc.pac2.R
 import edu.uoc.pac2.data.Book
+import kotlinx.android.synthetic.main.fragment_book_detail.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.InputStream
+import java.net.URL
 
 /**
  * A fragment representing a single Book detail screen.
@@ -28,12 +36,29 @@ class BookDetailFragment : Fragment() {
 
     // TODO: Get Book for the given {@param ARG_ITEM_ID} Book id
     private fun loadBook() {
-        throw NotImplementedError()
+        val itemId = arguments?.getInt(ARG_ITEM_ID)
+        if (itemId != null) {
+            GlobalScope.launch {
+                val book = (activity?.applicationContext as MyApplication).getBooksInteractor().getBookById(itemId)
+                if (book != null) {
+                    initUI(book)
+                }
+            }
+        }
     }
 
     // TODO: Init UI with book details
     private fun initUI(book: Book) {
-        throw NotImplementedError()
+        title_detail.text = book.title
+        author_detail.text = book.author
+        date_detail.text = book.publicationDate
+        description_detail.text = book.description
+
+        val inputStream = URL(book.urlImage).getContent() as InputStream
+        val drawableImage = Drawable.createFromStream(inputStream, "bookImage")
+        activity?.runOnUiThread(Runnable {
+            image_detail.setImageDrawable(drawableImage)
+        })
     }
 
     // TODO: Share Book Title and Image URL
