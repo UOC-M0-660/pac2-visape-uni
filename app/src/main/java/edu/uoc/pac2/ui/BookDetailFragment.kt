@@ -1,5 +1,6 @@
 package edu.uoc.pac2.ui
 
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
@@ -7,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.uoc.pac2.MyApplication
 import edu.uoc.pac2.R
 import edu.uoc.pac2.data.Book
+import kotlinx.android.synthetic.main.activity_book_detail.*
 import kotlinx.android.synthetic.main.fragment_book_detail.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -49,7 +52,7 @@ class BookDetailFragment : Fragment() {
 
     // TODO: Init UI with book details
     private fun initUI(book: Book) {
-        title_detail.text = book.title
+        (activity as BookDetailActivity).setTitle(book.title)
         author_detail.text = book.author
         date_detail.text = book.publicationDate
         description_detail.text = book.description
@@ -59,11 +62,22 @@ class BookDetailFragment : Fragment() {
         activity?.runOnUiThread(Runnable {
             image_detail.setImageDrawable(drawableImage)
         })
+
+        activity?.findViewById<FloatingActionButton>(R.id.floatingButton)?.setOnClickListener(View.OnClickListener {
+            shareContent(book)
+        })
     }
 
     // TODO: Share Book Title and Image URL
     private fun shareContent(book: Book) {
-        throw NotImplementedError()
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, ("Title: "+book.title+" URL: " +book.urlImage))
+            type = "text/plain"
+        }
+
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 
     companion object {
