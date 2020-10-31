@@ -60,7 +60,7 @@ class BookDetailFragment : Fragment() {
         val inputStream = URL(book.urlImage).getContent() as InputStream
         val drawableImage = Drawable.createFromStream(inputStream, "bookImage")
         activity?.runOnUiThread(Runnable {
-            image_detail.setImageDrawable(drawableImage)
+            (activity as BookDetailActivity).image_detail.setImageDrawable(drawableImage)
         })
 
         activity?.findViewById<FloatingActionButton>(R.id.floatingButton)?.setOnClickListener(View.OnClickListener {

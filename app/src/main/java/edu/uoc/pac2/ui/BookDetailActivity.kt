@@ -45,12 +45,18 @@ class BookDetailActivity : AppCompatActivity() {
 
     // TODO: Override finish animation for actionbar back arrow
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return super.onOptionsItemSelected(item)
+        if (item.itemId == android.R.id.home) {
+            finish()
+            overridePendingTransition(R.anim.translate_in_top, R.anim.translate_out_top)
+            return true
+        }
+        return false
     }
 
     // TODO: Override finish animation for phone back button
     override fun onBackPressed() {
         super.onBackPressed()
+        overridePendingTransition(R.anim.translate_in_top, R.anim.translate_out_top)
     }
 
 }

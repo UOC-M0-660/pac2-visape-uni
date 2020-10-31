@@ -64,10 +64,8 @@ class BookListActivity : AppCompatActivity() {
 
     // TODO: Get Books and Update UI
     private fun getBooks() {
-        GlobalScope.launch {
-            val books = (applicationContext as MyApplication).getBooksInteractor().getAllBooks()
-            adapter.setBooks(books)
-        }
+
+        loadBooksFromLocalDb()
 
         if ((applicationContext as MyApplication).hasInternetConnection()) {
             val db = Firebase.firestore
@@ -93,7 +91,10 @@ class BookListActivity : AppCompatActivity() {
 
     // TODO: Load Books from Room
     private fun loadBooksFromLocalDb() {
-        throw NotImplementedError()
+        GlobalScope.launch {
+            val books = (applicationContext as MyApplication).getBooksInteractor().getAllBooks()
+            adapter.setBooks(books)
+        }
     }
 
     // TODO: Save Books to Local Storage

@@ -67,6 +67,7 @@ class BooksListAdapter(private var books: List<Book>) : RecyclerView.Adapter<Boo
             val detailIntent = Intent(it.context, BookDetailActivity::class.java)
             detailIntent.putExtra(BookDetailFragment.ARG_ITEM_ID, book.uid)
             it.context.startActivity(detailIntent)
+            (it.context as BookListActivity).overridePendingTransition(R.anim.translate_in_bottom, R.anim.translate_out_bottom)
         })
     }
 
