@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.squareup.picasso.Picasso
 import edu.uoc.pac2.MyApplication
 import edu.uoc.pac2.R
 import edu.uoc.pac2.data.Book
@@ -57,10 +58,11 @@ class BookDetailFragment : Fragment() {
         date_detail.text = book.publicationDate
         description_detail.text = book.description
 
-        val inputStream = URL(book.urlImage).getContent() as InputStream
-        val drawableImage = Drawable.createFromStream(inputStream, "bookImage")
         activity?.runOnUiThread(Runnable {
-            (activity as BookDetailActivity).image_detail.setImageDrawable(drawableImage)
+            Picasso.get().load(book.urlImage)
+                    .placeholder(R.drawable.progress_animation)
+                    .error(R.drawable.progress_animation)
+                    .into((activity as BookDetailActivity).image_detail)
         })
 
         activity?.findViewById<FloatingActionButton>(R.id.floatingButton)?.setOnClickListener(View.OnClickListener {
