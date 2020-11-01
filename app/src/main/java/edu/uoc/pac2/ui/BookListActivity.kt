@@ -1,14 +1,28 @@
 package edu.uoc.pac2.ui
 
+import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import edu.uoc.pac2.MyApplication
 import edu.uoc.pac2.R
+import edu.uoc.pac2.data.ApplicationDatabase
 import edu.uoc.pac2.data.Book
 import edu.uoc.pac2.data.BooksInteractor
+import edu.uoc.pac2.data.FirestoreBookData
+import kotlinx.android.synthetic.main.activity_book_list.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * An activity representing a list of Books.
@@ -16,12 +30,22 @@ import edu.uoc.pac2.data.BooksInteractor
 class BookListActivity : AppCompatActivity() {
 
     private val TAG = "BookListActivity"
+    private val BOOKS_COLLETION = "books"
 
     private lateinit var adapter: BooksListAdapter
+
+    lateinit var mAdView : AdView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_book_list)
+
+        MobileAds.initialize(this) {}
+
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+
 
         // Init UI
         initToolbar()
@@ -31,6 +55,7 @@ class BookListActivity : AppCompatActivity() {
         getBooks()
 
         // TODO: Add books data to Firestore [Use once for new projects with empty Firestore Database]
+        //FirestoreBookData.addBooksDataToFirestoreDatabase()
     }
 
     // Init Top Toolbar
@@ -54,15 +79,42 @@ class BookListActivity : AppCompatActivity() {
     // TODO: Get Books and Update UI
     private fun getBooks() {
 
+        loadBooksFromLocalDb()
+
+        if ((applicationContext as MyApplication).hasInternetConnection()) {
+            val db = Firebase.firestore
+            val colRef = db.collection(BOOKS_COLLETION)
+
+            colRef.addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    Log.d(TAG, "Data received")
+                    val books: List<Book> = snapshot.documents.mapNotNull { it.toObject(Book::class.java) }
+                    saveBooksToLocalDatabase(books)
+                    adapter.setBooks(books)
+                } else {
+                    Log.d(TAG, "Current data: null")
+                }
+            }
+        }
     }
 
     // TODO: Load Books from Room
     private fun loadBooksFromLocalDb() {
-        throw NotImplementedError()
+        GlobalScope.launch {
+            val books = (applicationContext as MyApplication).getBooksInteractor().getAllBooks()
+            adapter.setBooks(books)
+        }
     }
 
     // TODO: Save Books to Local Storage
     private fun saveBooksToLocalDatabase(books: List<Book>) {
-        throw NotImplementedError()
+        GlobalScope.launch {
+            (applicationContext as MyApplication).getBooksInteractor().saveBooks(books)
+        }
     }
 }
